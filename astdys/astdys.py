@@ -105,8 +105,6 @@ class astdys:
             cat[col] = cat[col].map(lambda x: float(x) * np.pi / 180)
 
         column_to_move = "epoch"
-        cat = cat[
-            [col for col in cat.columns if col != column_to_move] + [column_to_move]
-        ]
+        cat = cat[[col for col in cat.columns if col != column_to_move] + [column_to_move]]
         cat.drop(cat.columns[[8, 9, 10]], axis=1, inplace=True)
         return cat

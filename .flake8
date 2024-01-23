@@ -13,3 +13,4 @@ exclude =
     __init__.py
     .venv
     astdys/__init__.py
+    tests/test_real.py
