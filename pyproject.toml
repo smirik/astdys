@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "astdys"
+version = "0.1.0"
+description = "AstDyS wrapper in python"
+authors = ["Evgeny Smirnov <smirik@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.2.0"
+numpy = "^1.26.3"
+pyarrow = "^15.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+black = "^23.12.1"
+flake8 = "^7.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
