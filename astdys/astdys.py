@@ -3,6 +3,7 @@ import numpy as np
 from pathlib import Path
 import os
 import urllib.request
+from typing import Union
 
 from astdys.util import convert_mjd_to_date
 
@@ -22,15 +23,22 @@ class astdys:
             cls.logger.info(text)
 
     @classmethod
-    def search(cls, num):
-        num = str(num)
+    def search(cls, num: Union[int, dict]):
         if cls.catalog is None:
             cls.load()
 
-        if num in cls.catalog["num"].values:
-            return cls.catalog.loc[cls.catalog["num"] == num].to_dict("records")[0]
+        if isinstance(num, int):
+            num = str(num)
 
-        return None
+            if num in cls.catalog.index:
+                return cls.catalog.loc[num].to_dict()
+
+            return None
+        else:
+            num_str = [str(n) for n in num]
+            filtered_catalog = cls.catalog.loc[cls.catalog.index.intersection(num_str)]
+            result = filtered_catalog.to_dict(orient='index')
+            return result
 
     @classmethod
     def catalog_time(cls):
@@ -60,6 +68,7 @@ class astdys:
 
         cls.catalog = pd.read_csv(filename)
         cls.catalog["num"] = cls.catalog["num"].astype(str)
+        cls.catalog.set_index('num', inplace=True)
 
     @classmethod
     def rebuild(cls):
