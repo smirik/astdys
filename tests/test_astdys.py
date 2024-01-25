@@ -9,8 +9,16 @@ import astdys
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
-    astdys.astdys.catalog_filename = "tests/small.csv"
-    astdys.astdys.catalog_original_filename = "tests/small.cat"
+    catalog1 = astdys.Catalog(
+        original_filename='tests/small.cat',
+        filename='tests/small.csv',
+        url="",
+        catalog_type='osculating',
+        skip_rows=6,
+        columns=['num', 'epoch', 'a', 'e', 'inc', 'Omega', 'omega', 'M', 'del_1', 'del_2', 'del_3'],
+        degree_columns=["inc", "Omega", "omega", "M"],
+    )
+    astdys.astdys.catalogs_configs = {'osculating': catalog1}
     Path("cache/tests").mkdir(parents=True, exist_ok=True)
     yield
     shutil.rmtree("cache/tests")
@@ -24,7 +32,6 @@ def test_transform_astdys_catalog():
     assert "omega" in cat
     assert "Omega" in cat
     assert "M" in cat
-
     assert 10 == len(cat)
 
     assert 2.766 == pytest.approx(cat["a"].iloc[0], 0.01)
@@ -51,10 +58,9 @@ def test_build():
 
 
 def test_load():
-    astdys.astdys.catalog = None
-    assert astdys.astdys.catalog is None
+    assert astdys.astdys.catalog() is None
     astdys.astdys.load()
-    assert astdys.astdys.catalog is not None
+    assert astdys.astdys.catalog() is not None
 
 
 def test_search():
@@ -72,3 +78,23 @@ def test_search():
     assert obj is None
     obj = astdys.astdys.search(123456789)
     assert obj is None
+
+
+def test_search_list():
+    objects = astdys.astdys.search([6])
+    obj = objects['6']
+    assert 2.42456 == pytest.approx(obj["a"], 0.01)
+    assert 0.20328 == pytest.approx(obj["e"], 0.01)
+    assert 14.73973 == pytest.approx(obj["inc"] / np.pi * 180, 0.01)
+    assert 138.64293 == pytest.approx(obj["Omega"] / np.pi * 180, 0.01)
+    assert 239.70765 == pytest.approx(obj["omega"] / np.pi * 180, 0.01)
+    assert 242.94481 == pytest.approx(obj["M"] / np.pi * 180, 0.01)
+
+    objects = astdys.astdys.search([5, 6, 7, 100])
+    assert '5' in objects
+    assert '6' in objects
+    assert '7' in objects
+    assert 2.57362 == pytest.approx(objects['5']["a"], 0.01)
+    assert 2.42456 == pytest.approx(objects['6']["a"], 0.01)
+    assert 2.38713 == pytest.approx(objects['7']["a"], 0.01)
+    assert '100' not in objects
