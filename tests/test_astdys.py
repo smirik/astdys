@@ -9,8 +9,16 @@ import astdys
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
-    astdys.astdys.catalog_filename = "tests/small.csv"
-    astdys.astdys.catalog_original_filename = "tests/small.cat"
+    catalog1 = astdys.Catalog(
+        original_filename='tests/small.cat',
+        filename='tests/small.csv',
+        url="",
+        catalog_type='osculating',
+        skip_rows=6,
+        columns=['num', 'epoch', 'a', 'e', 'inc', 'Omega', 'omega', 'M', 'del_1', 'del_2', 'del_3'],
+        degree_columns=["inc", "Omega", "omega", "M"],
+    )
+    astdys.astdys.catalogs_configs = {'osculating': catalog1}
     Path("cache/tests").mkdir(parents=True, exist_ok=True)
     yield
     shutil.rmtree("cache/tests")
@@ -24,7 +32,6 @@ def test_transform_astdys_catalog():
     assert "omega" in cat
     assert "Omega" in cat
     assert "M" in cat
-
     assert 10 == len(cat)
 
     assert 2.766 == pytest.approx(cat["a"].iloc[0], 0.01)
@@ -51,10 +58,9 @@ def test_build():
 
 
 def test_load():
-    astdys.astdys.catalog = None
-    assert astdys.astdys.catalog is None
+    assert astdys.astdys.catalog() is None
     astdys.astdys.load()
-    assert astdys.astdys.catalog is not None
+    assert astdys.astdys.catalog() is not None
 
 
 def test_search():
@@ -92,4 +98,3 @@ def test_search_list():
     assert 2.42456 == pytest.approx(objects['6']["a"], 0.01)
     assert 2.38713 == pytest.approx(objects['7']["a"], 0.01)
     assert '100' not in objects
-    # assert None == pytest.approx(objects[3]["a"], 0.01)
