@@ -57,7 +57,7 @@ class astdys:
             cls.logger.info(text)
 
     @classmethod
-    def search(cls, num: Union[int, dict]):
+    def search(cls, num: Union[int, dict]) -> dict[str, Union[float, int]]:
         if cls.catalog() is None:
             cls.load()
 
