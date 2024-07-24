@@ -64,7 +64,7 @@ def test_load():
 
 
 def test_search():
-    obj = astdys.astdys.search(6)
+    obj = astdys.search(6)
     assert 2.42456 == pytest.approx(obj["a"], 0.01)
     assert 0.20328 == pytest.approx(obj["e"], 0.01)
     assert 14.73973 == pytest.approx(obj["inc"] / np.pi * 180, 0.01)
@@ -72,16 +72,16 @@ def test_search():
     assert 239.70765 == pytest.approx(obj["omega"] / np.pi * 180, 0.01)
     assert 242.94481 == pytest.approx(obj["M"] / np.pi * 180, 0.01)
 
-    obj = astdys.astdys.search(10)
+    obj = astdys.search(10)
     assert obj is not None
-    obj = astdys.astdys.search(11)
+    obj = astdys.search(11)
     assert obj is None
-    obj = astdys.astdys.search(123456789)
+    obj = astdys.search(123456789)
     assert obj is None
 
 
 def test_search_list():
-    objects = astdys.astdys.search([6])
+    objects = astdys.search([6])
     obj = objects['6']
     assert 2.42456 == pytest.approx(obj["a"], 0.01)
     assert 0.20328 == pytest.approx(obj["e"], 0.01)
@@ -90,7 +90,7 @@ def test_search_list():
     assert 239.70765 == pytest.approx(obj["omega"] / np.pi * 180, 0.01)
     assert 242.94481 == pytest.approx(obj["M"] / np.pi * 180, 0.01)
 
-    objects = astdys.astdys.search([5, 6, 7, 100])
+    objects = astdys.search([5, 6, 7, 100])
     assert '5' in objects
     assert '6' in objects
     assert '7' in objects

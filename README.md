@@ -13,7 +13,7 @@ pip install astdys
 ```python
 import astdys
 
-elements = astdys.astdys.search(1)
+elements = astdys.search(1)
 print(elements)
 ```
 
