@@ -1,13 +1,13 @@
 [tool.poetry]
 name = "astdys"
-version = "0.9.0"
+version = "0.9.1"
 description = "AstDyS wrapper in python"
 authors = ["Evgeny Smirnov <smirik@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.9"
 pandas = "^2.2.0"
 numpy = "^2.0.1"
 pyarrow = "^17.0.0"
