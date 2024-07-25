@@ -57,11 +57,11 @@ class astdys:
             cls.logger.info(text)
 
     @classmethod
-    def search(cls, num: Union[int, dict]) -> dict[str, Union[float, int]]:
+    def search(cls, num: Union[int, dict]) -> dict[str, list[Union[str, float]]]:
         if cls.catalog() is None:
             cls.load()
 
-        if isinstance(num, int):
+        if isinstance(num, int) or isinstance(num, str):
             num = str(num)
 
             if num in cls.catalog().index:
@@ -73,6 +73,13 @@ class astdys:
             filtered_catalog = cls.catalog().loc[cls.catalog().index.intersection(num_str)]
             result = filtered_catalog.to_dict(orient='index')
             return result
+
+    @classmethod
+    def search_by_axis(cls, axis: float, sigma=0.1) -> pd.DataFrame:
+        if cls.catalog() is None:
+            cls.load()
+        df = cls.catalog()[(cls.catalog()['a'] >= axis - sigma) & (cls.catalog()['a'] <= axis + sigma)]
+        return df
 
     @classmethod
     def catalog_time(cls):
