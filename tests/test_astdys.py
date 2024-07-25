@@ -98,3 +98,15 @@ def test_search_list():
     assert 2.42456 == pytest.approx(objects['6']["a"], 0.01)
     assert 2.38713 == pytest.approx(objects['7']["a"], 0.01)
     assert '100' not in objects
+
+
+def test_search_by_axis():
+    obj = astdys.search_by_axis(2.70)
+    assert 3 == len(obj)
+    assert isinstance(obj, pd.DataFrame)
+
+    obj = astdys.search_by_axis(2.70, sigma=0.05)
+    assert 1 == len(obj)
+
+    obj = astdys.search_by_axis(1.0)
+    assert 0 == len(obj)
