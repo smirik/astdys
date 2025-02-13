@@ -3,9 +3,10 @@ import numpy as np
 from pathlib import Path
 import os
 import urllib.request
+import datetime
 from typing import Union, Optional
 
-from astdys.util import convert_mjd_to_date
+from astdys.util import convert_mjd_to_date, convert_mjd_to_datetime
 from astdys.catalog import Catalog
 
 catalog1 = Catalog(
@@ -38,32 +39,12 @@ class astdys:
     catalog_type = 'osculating'
 
     @classmethod
-    def catalog(cls) -> Optional[pd.DataFrame]:
-        if cls.catalog_type in cls.catalogs:
-            return cls.catalogs[cls.catalog_type]
-        return None
-
-    @classmethod
-    def catalog_config(cls) -> Optional[Catalog]:
-        if cls.catalog_type in cls.catalogs_configs:
-            return cls.catalogs_configs[cls.catalog_type]
-        return None
-
-    @classmethod
-    def log(cls, text: str) -> None:
-        if cls.logger is None:
-            print(text)
-        else:
-            cls.logger.info(text)
-
-    @classmethod
     def search(cls, num: Union[int, dict]) -> dict[str, list[Union[str, float]]]:
         if cls.catalog() is None:
             cls.load()
 
         if isinstance(num, int) or isinstance(num, str):
             num = str(num)
-
             if num in cls.catalog().index:
                 return cls.catalog().loc[num].to_dict()
 
@@ -82,24 +63,6 @@ class astdys:
         return df
 
     @classmethod
-    def catalog_time(cls):
-        if cls.catalog() is None:
-            cls.load()
-
-        elems = cls.search(1)
-        return convert_mjd_to_date(elems["epoch"])
-
-    @classmethod
-    def astdys_full_filename(cls) -> str:
-        filename = f"{os.getcwd()}/{cls.catalog_config().original_filename}"
-        return filename
-
-    @classmethod
-    def catalog_full_filename(cls) -> str:
-        filename = f"{os.getcwd()}/{cls.catalog_config().filename}"
-        return filename
-
-    @classmethod
     def load(cls):
         filename = cls.catalog_full_filename()
         if cls.catalog() is None:
@@ -110,6 +73,58 @@ class astdys:
         cls.catalogs[cls.catalog_type] = pd.read_csv(filename, dtype={0: str})
         cls.catalogs[cls.catalog_type]["num"] = cls.catalogs[cls.catalog_type]["num"].astype(str)
         cls.catalogs[cls.catalog_type].set_index('num', inplace=True)
+
+    @classmethod
+    def catalog(cls) -> Optional[pd.DataFrame]:
+        if cls.catalog_type in cls.catalogs:
+            return cls.catalogs[cls.catalog_type]
+        return None
+
+    @classmethod
+    def set_type(cls, catalog_type: str) -> None:
+        if catalog_type in cls.catalogs_configs:
+            cls.catalog_type = catalog_type
+            cls.load()
+        else:
+            raise Exception(f"Catalog type {catalog_type} is not supported")
+
+    @classmethod
+    def catalog_config(cls) -> Optional[Catalog]:
+        if cls.catalog_type in cls.catalogs_configs:
+            return cls.catalogs_configs[cls.catalog_type]
+        return None
+
+    @classmethod
+    def log(cls, text: str) -> None:
+        if cls.logger is None:
+            print(text)
+        else:
+            cls.logger.debug(text)
+
+    @classmethod
+    def catalog_time(cls) -> str:
+        if cls.catalog() is None:
+            cls.load()
+
+        elems = cls.search(1)
+        return convert_mjd_to_date(elems["epoch"])
+
+    @classmethod
+    def datetime(cls) -> datetime.datetime:
+        if cls.catalog() is None:
+            cls.load()
+        elems = cls.search(1)
+        return convert_mjd_to_datetime(elems["epoch"])
+
+    @classmethod
+    def astdys_full_filename(cls) -> str:
+        filename = f"{os.getcwd()}/{cls.catalog_config().original_filename}"
+        return filename
+
+    @classmethod
+    def catalog_full_filename(cls) -> str:
+        filename = f"{os.getcwd()}/{cls.catalog_config().filename}"
+        return filename
 
     @classmethod
     def rebuild(cls):

@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 
 import astdys
+import astdys.util
 
 
 @pytest.fixture(autouse=True)
@@ -18,10 +19,37 @@ def run_around_tests():
         columns=['num', 'epoch', 'a', 'e', 'inc', 'Omega', 'omega', 'M', 'del_1', 'del_2', 'del_3'],
         degree_columns=["inc", "Omega", "omega", "M"],
     )
-    astdys.astdys.catalogs_configs = {'osculating': catalog1}
+    catalog2 = astdys.Catalog(
+        original_filename='tests/proper.cat',
+        filename='tests/proper.csv',
+        url="",
+        catalog_type='synthetic',
+        skip_rows=2,
+        columns=['num', 'mag', 'a', 'e', 'sinI', 'n', 'del_1', 'del_2', 'lce', 'del_3'],
+        degree_columns=["sinI", "n"],
+    )
+    astdys.astdys.catalogs_configs = {'osculating': catalog1, 'synthetic': catalog2}
     Path("cache/tests").mkdir(parents=True, exist_ok=True)
     yield
     shutil.rmtree("cache/tests")
+
+
+def test_convert_mjd_to_date():
+    assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_date(0)
+    assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_date(59215)
+    astdys.astdys.catalogs = {}
+
+
+def test_convert_mjd_to_datetime():
+    assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_datetime(0).strftime("%Y-%m-%d %H:%M:%S")
+    assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_datetime(59215).strftime("%Y-%m-%d %H:%M:%S")
+    astdys.astdys.catalogs = {}
+
+
+def test_catalog_dates():
+    assert "2020-12-17 00:00:00" == astdys.catalog_time()
+    assert "2020-12-17 00:00:00" == astdys.datetime().strftime("%Y-%m-%d %H:%M:%S")
+    astdys.astdys.catalogs = {}
 
 
 def test_transform_astdys_catalog():
@@ -61,6 +89,17 @@ def test_load():
     assert astdys.astdys.catalog() is None
     astdys.astdys.load()
     assert astdys.astdys.catalog() is not None
+
+
+def test_multiple_catalogs():
+    obj = astdys.search(1)
+    assert 2.76608 == pytest.approx(obj["a"], 0.01)
+    astdys.set_type("synthetic")
+    obj = astdys.search(1)
+    assert 22.7670962 == pytest.approx(obj["a"], 0.01)
+    astdys.set_type("osculating")
+    obj = astdys.search(1)
+    assert 2.76608 == pytest.approx(obj["a"], 0.01)
 
 
 def test_search():
