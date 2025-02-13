@@ -38,32 +38,12 @@ class astdys:
     catalog_type = 'osculating'
 
     @classmethod
-    def catalog(cls) -> Optional[pd.DataFrame]:
-        if cls.catalog_type in cls.catalogs:
-            return cls.catalogs[cls.catalog_type]
-        return None
-
-    @classmethod
-    def catalog_config(cls) -> Optional[Catalog]:
-        if cls.catalog_type in cls.catalogs_configs:
-            return cls.catalogs_configs[cls.catalog_type]
-        return None
-
-    @classmethod
-    def log(cls, text: str) -> None:
-        if cls.logger is None:
-            print(text)
-        else:
-            cls.logger.info(text)
-
-    @classmethod
     def search(cls, num: Union[int, dict]) -> dict[str, list[Union[str, float]]]:
         if cls.catalog() is None:
             cls.load()
 
         if isinstance(num, int) or isinstance(num, str):
             num = str(num)
-
             if num in cls.catalog().index:
                 return cls.catalog().loc[num].to_dict()
 
@@ -82,6 +62,45 @@ class astdys:
         return df
 
     @classmethod
+    def load(cls):
+        filename = cls.catalog_full_filename()
+        if cls.catalog() is None:
+            output_file = Path(filename)
+            if not output_file.exists():
+                cls.build()
+
+        cls.catalogs[cls.catalog_type] = pd.read_csv(filename, dtype={0: str})
+        cls.catalogs[cls.catalog_type]["num"] = cls.catalogs[cls.catalog_type]["num"].astype(str)
+        cls.catalogs[cls.catalog_type].set_index('num', inplace=True)
+
+    @classmethod
+    def catalog(cls) -> Optional[pd.DataFrame]:
+        if cls.catalog_type in cls.catalogs:
+            return cls.catalogs[cls.catalog_type]
+        return None
+
+    @classmethod
+    def set_type(cls, catalog_type: str) -> None:
+        if catalog_type in cls.catalogs_configs:
+            cls.catalog_type = catalog_type
+            cls.load()
+        else:
+            raise Exception(f"Catalog type {catalog_type} is not supported")
+
+    @classmethod
+    def catalog_config(cls) -> Optional[Catalog]:
+        if cls.catalog_type in cls.catalogs_configs:
+            return cls.catalogs_configs[cls.catalog_type]
+        return None
+
+    @classmethod
+    def log(cls, text: str) -> None:
+        if cls.logger is None:
+            print(text)
+        else:
+            cls.logger.debug(text)
+
+    @classmethod
     def catalog_time(cls):
         if cls.catalog() is None:
             cls.load()
@@ -98,18 +117,6 @@ class astdys:
     def catalog_full_filename(cls) -> str:
         filename = f"{os.getcwd()}/{cls.catalog_config().filename}"
         return filename
-
-    @classmethod
-    def load(cls):
-        filename = cls.catalog_full_filename()
-        if cls.catalog() is None:
-            output_file = Path(filename)
-            if not output_file.exists():
-                cls.build()
-
-        cls.catalogs[cls.catalog_type] = pd.read_csv(filename, dtype={0: str})
-        cls.catalogs[cls.catalog_type]["num"] = cls.catalogs[cls.catalog_type]["num"].astype(str)
-        cls.catalogs[cls.catalog_type].set_index('num', inplace=True)
 
     @classmethod
     def rebuild(cls):
