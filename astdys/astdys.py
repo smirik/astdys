@@ -3,9 +3,10 @@ import numpy as np
 from pathlib import Path
 import os
 import urllib.request
+import datetime
 from typing import Union, Optional
 
-from astdys.util import convert_mjd_to_date
+from astdys.util import convert_mjd_to_date, convert_mjd_to_datetime
 from astdys.catalog import Catalog
 
 catalog1 = Catalog(
@@ -101,12 +102,19 @@ class astdys:
             cls.logger.debug(text)
 
     @classmethod
-    def catalog_time(cls):
+    def catalog_time(cls) -> str:
         if cls.catalog() is None:
             cls.load()
 
         elems = cls.search(1)
         return convert_mjd_to_date(elems["epoch"])
+
+    @classmethod
+    def datetime(cls) -> datetime.datetime:
+        if cls.catalog() is None:
+            cls.load()
+        elems = cls.search(1)
+        return convert_mjd_to_datetime(elems["epoch"])
 
     @classmethod
     def astdys_full_filename(cls) -> str:

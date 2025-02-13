@@ -30,6 +30,18 @@ print(objects)
 
 The method will return a dataframe containing all records found. `sigma` is optional and represent the variation (from `axis-sigma` to `axis+sigma`). The default value of `sigma=0.1`.
 
+To get the current date of the catalog you can use `catalog_time()` and `datetime()`:
+
+```python
+import astdys
+
+date_str = astdys.catalog_time() # string
+print(date_str)
+
+date = astdys.datetime() # datetime.datetime
+print(date)
+```
+
 ## License
 
 MIT

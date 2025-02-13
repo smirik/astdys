@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 
 import astdys
+import astdys.util
 
 
 @pytest.fixture(autouse=True)
@@ -31,6 +32,24 @@ def run_around_tests():
     Path("cache/tests").mkdir(parents=True, exist_ok=True)
     yield
     shutil.rmtree("cache/tests")
+
+
+def test_convert_mjd_to_date():
+    assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_date(0)
+    assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_date(59215)
+    astdys.astdys.catalogs = {}
+
+
+def test_convert_mjd_to_datetime():
+    assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_datetime(0).strftime("%Y-%m-%d %H:%M:%S")
+    assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_datetime(59215).strftime("%Y-%m-%d %H:%M:%S")
+    astdys.astdys.catalogs = {}
+
+
+def test_catalog_dates():
+    assert "2020-12-17 00:00:00" == astdys.catalog_time()
+    assert "2020-12-17 00:00:00" == astdys.datetime().strftime("%Y-%m-%d %H:%M:%S")
+    astdys.astdys.catalogs = {}
 
 
 def test_transform_astdys_catalog():
