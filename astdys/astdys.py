@@ -25,7 +25,7 @@ catalog2 = Catalog(
     url="https://newton.spacedys.com/~astdys2/propsynth/all.syn",
     catalog_type='synthetic',
     skip_rows=2,
-    columns=['num', 'mag', 'a', 'e', 'sinI', 'n', 'del_1', 'del_2', 'lce', 'del_3'],
+    columns=['num', 'mag', 'a', 'e', 'sinI', 'n', 'g', 's', 'lce', 'my'],
     degree_columns=["sinI", "n"],
 )
 
