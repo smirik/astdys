@@ -11,7 +11,12 @@ publish-test:
 	poetry config repositories.testpypi https://test.pypi.org/legacy/
 	poetry publish -r testpypi
 
+build:
+	rm -rf dist/
+	poetry build
+
 publish:
+	rm -rf dist/
 	poetry publish --build
 
 clean:

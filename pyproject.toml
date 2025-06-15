@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "astdys"
-version = "0.9.3"
+version = "0.9.4"
 description = "AstDyS wrapper in python"
 authors = ["Evgeny Smirnov <smirik@gmail.com>"]
 license = "MIT"
