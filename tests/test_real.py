@@ -17,3 +17,12 @@ def run_around_tests():
 def test_transform_astdys_catalog():
     data = astdys.astdys.search(1)
     assert data is not None
+
+
+def test_transform_astdys_synthetic_catalog():
+    astdys.set_type("synthetic")
+    data = astdys.astdys.search(1)
+    assert data is not None
+    assert 2.7670962 == pytest.approx(data["a"], 0.01)
+    assert 54.070272 == pytest.approx(data["g"], 0.1)
+    assert -59.170034 == pytest.approx(data["s"], 0.1)
