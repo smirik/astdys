@@ -1,9 +1,15 @@
+from dataclasses import dataclass
+from typing import List
+
+
+@dataclass
 class Catalog:
-    def __init__(self, original_filename, filename, url, catalog_type, skip_rows, columns, degree_columns):
-        self.original_filename = original_filename
-        self.filename = filename
-        self.url = url
-        self.catalog_type = catalog_type
-        self.skip_rows = skip_rows
-        self.columns = columns
-        self.degree_columns = degree_columns
+    """Configuration for an AstDyS catalog."""
+
+    original_filename: str
+    filename: str
+    url: str
+    catalog_type: str
+    skip_rows: int
+    columns: List[str]
+    degree_columns: List[str]

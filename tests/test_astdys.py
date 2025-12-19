@@ -10,13 +10,17 @@ import astdys.util
 
 @pytest.fixture(autouse=True)
 def run_around_tests():
+    # Store original configs
+    original_configs = astdys.AstDys.catalogs_configs
+    original_type = astdys.AstDys.catalog_type
+
     catalog1 = astdys.Catalog(
         original_filename='tests/small.cat',
         filename='tests/small.csv',
         url="",
         catalog_type='osculating',
         skip_rows=6,
-        columns=['num', 'epoch', 'a', 'e', 'inc', 'Omega', 'omega', 'M', 'del_1', 'del_2', 'del_3'],
+        columns=['name', 'epoch', 'a', 'e', 'inc', 'Omega', 'omega', 'M', 'del_1', 'del_2', 'del_3'],
         degree_columns=["inc", "Omega", "omega", "M"],
     )
     catalog2 = astdys.Catalog(
@@ -25,35 +29,37 @@ def run_around_tests():
         url="",
         catalog_type='synthetic',
         skip_rows=2,
-        columns=['num', 'mag', 'a', 'e', 'sinI', 'n', 'del_1', 'del_2', 'lce', 'del_3'],
+        columns=['name', 'mag', 'a', 'e', 'sinI', 'n', 'g', 's', 'lce', 'my'],
         degree_columns=["sinI", "n"],
     )
-    astdys.astdys.catalogs_configs = {'osculating': catalog1, 'synthetic': catalog2}
+    astdys.AstDys.catalogs_configs = {'osculating': catalog1, 'synthetic': catalog2}
     Path("cache/tests").mkdir(parents=True, exist_ok=True)
     yield
-    shutil.rmtree("cache/tests")
+    # Clean up
+    astdys.AstDys.catalogs = {}
+    astdys.AstDys.catalog_type = original_type
+    astdys.AstDys.catalogs_configs = original_configs
+    if Path("cache/tests").exists():
+        shutil.rmtree("cache/tests")
 
 
 def test_convert_mjd_to_date():
     assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_date(0)
     assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_date(59215)
-    astdys.astdys.catalogs = {}
 
 
 def test_convert_mjd_to_datetime():
     assert "1858-11-17 00:00:00" == astdys.util.convert_mjd_to_datetime(0).strftime("%Y-%m-%d %H:%M:%S")
     assert "2021-01-01 00:00:00" == astdys.util.convert_mjd_to_datetime(59215).strftime("%Y-%m-%d %H:%M:%S")
-    astdys.astdys.catalogs = {}
 
 
 def test_catalog_dates():
-    assert "2020-12-17 00:00:00" == astdys.catalog_time()
-    assert "2020-12-17 00:00:00" == astdys.datetime().strftime("%Y-%m-%d %H:%M:%S")
-    astdys.astdys.catalogs = {}
+    assert "2020-12-17 00:00:00" == astdys.get_catalog_time()
+    assert "2020-12-17 00:00:00" == astdys.get_catalog_datetime().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def test_transform_astdys_catalog():
-    cat = astdys.astdys.transform_astdys_catalog()
+    cat = astdys.AstDys._transform_astdys_catalog()
     assert "a" in cat
     assert "e" in cat
     assert "inc" in cat
@@ -65,7 +71,7 @@ def test_transform_astdys_catalog():
     assert 2.766 == pytest.approx(cat["a"].iloc[0], 0.01)
     assert 0.07816 == pytest.approx(cat["e"].iloc[0], 0.01)
 
-    assert "6" == cat["num"].iloc[5]
+    assert "6" == cat["name"].iloc[5]
     assert 2.42456 == pytest.approx(cat["a"].iloc[5], 0.01)
     assert 0.20328 == pytest.approx(cat["e"].iloc[5], 0.01)
     assert 14.73973 == pytest.approx(cat["inc"].iloc[5] / np.pi * 180, 0.01)
@@ -75,20 +81,26 @@ def test_transform_astdys_catalog():
 
 
 def test_build():
-    astdys.astdys.build()
+    astdys.AstDys._build()
 
-    cat = pd.read_csv("tests/small.csv")
+    cat = pd.read_csv("tests/small.csv", dtype={'name': str})
     assert 10 == len(cat)
     assert 2.766 == pytest.approx(cat["a"].iloc[0], 0.01)
     assert 0.07816 == pytest.approx(cat["e"].iloc[0], 0.01)
-    assert 6 == cat["num"].iloc[5]
+    assert "6" == cat["name"].iloc[5]
     assert 2.42456 == pytest.approx(cat["a"].iloc[5], 0.01)
 
 
 def test_load():
-    assert astdys.astdys.catalog() is None
-    astdys.astdys.load()
-    assert astdys.astdys.catalog() is not None
+    assert astdys.AstDys._catalog() is None
+    astdys.load()
+    assert astdys.AstDys._catalog() is not None
+
+
+def test_full_load():
+    assert astdys.AstDys._catalog() is None
+    astdys.AstDys.load()
+    assert astdys.AstDys._catalog() is not None
 
 
 def test_multiple_catalogs():
