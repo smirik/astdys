@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "astdys"
-version = "1.0.0"
+version = "1.0.1"
 description = "AstDyS wrapper in python"
 authors = ["Evgeny Smirnov <smirik@gmail.com>"]
 license = "MIT"
@@ -10,7 +10,7 @@ readme = "README.md"
 python = ">=3.9"
 pandas = "^2.2.0"
 numpy = "^2.0.1"
-pyarrow = "^17.0.0"
+pyarrow = ">=17.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.4"
