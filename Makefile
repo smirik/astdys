@@ -1,23 +1,24 @@
-test:
-	poetry run flake8 --count
-	poetry run black . --check
-	poetry run pytest -v tests
+install:
+	uv sync
+
+test: install
+	uv run flake8 --count
+	uv run black . --check
+	uv run pytest -v tests
 
 test-only:
-	poetry run pytest -v tests
-
-publish-test:
-	poetry build
-	poetry config repositories.testpypi https://test.pypi.org/legacy/
-	poetry publish -r testpypi
+	uv run pytest -v tests
 
 build:
 	rm -rf dist/
-	poetry build
+	uv build
 
-publish:
-	rm -rf dist/
-	poetry publish --build
+# The PyPI token: UV_PUBLISH_TOKEN=pypi-... make publish (or --token)
+publish-test: build
+	uv publish --publish-url https://test.pypi.org/legacy/
+
+publish: build
+	uv publish
 
 clean:
 	rm -f cache/allnum.cat
